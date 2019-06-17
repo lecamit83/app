@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link , Switch} from 'react-router-dom';
 import Login from './components/login/Login';
 import Home from './components/home/Home';
 function App() {
@@ -14,8 +14,11 @@ function App() {
     				<Link to={"/home"}>Home</Link>
     			</li>
     		</ul>
-    		<Route exact path="/" component={Login}/>
-    		<Route path="/home" component={Home} />
+    		<Switch>
+	    		<Route exact path="/" component={Login}/>
+	    		<Route path="/home" component={Home} />
+	    		<Route component={Login}/>
+    		</Switch>
     	</div>
     </Router>  
   );

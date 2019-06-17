@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
+
+import { getFromStorage , setInStorage } from '../../utils/storage';
+import { TOKEN, USER_INFO } from '../../const';
+
 import './Login.css';
 
 function Login(props) {
   const [email, setEmail] = useState('');
   const [password , setPassword ] = useState('');
+  
+  useEffect(()=>{
+    //componentDidMount
+    
+    const { token } = getFromStorage(TOKEN) || '';
+    
+    if(token && token !== null){
+      navigateToHome();
+    }
+    return function cleanUp(){
+      //componentUnMount
+      
+    }
+
+  },[])
+
   return (
     <div className="container">
       <form className="form-login">
@@ -26,9 +46,14 @@ function Login(props) {
     axios.post('http://localhost:5050/auth/login', user)
       .then(res=>{
         let {token, user} = res.data;
-        props.history.replace("/home");
+        setInStorage(TOKEN,{token});
+        setInStorage(USER_INFO, {user});
+        navigateToHome();
       })
       .catch(err=>{});
+  }
+  function navigateToHome(){
+    props.history.replace("/home");
   }
 }
 
