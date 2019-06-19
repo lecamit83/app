@@ -1,0 +1,23 @@
+.container {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.form-sign-up {
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    margin: 16px;
+}
+
+.form-sign-up .text-field {
+    margin: 4px;
+}
+
+.form-sign-up .btn-login {
+    margin: 4px;
+    margin-top: 16px;
+}
+  
