@@ -5,13 +5,27 @@
     width: 100vw;
     height: 100vh;
 }
+.box {
+    display: flex;
+    flex-direction: row;
+    width: 900px;
+    height: 90vh;
+    
+}
+.side-bar-friend {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: 90vh;
+    border-style: solid;
+}
 .box-chat {
 	display: flex;
     flex-direction: column;
-	width: 500px;
+	width: 600px;
     height: 90vh;
     background: blue;
-
+    border-style: solid;
 }
 .header-content {
 	display: flex;
@@ -58,6 +72,12 @@
     align-items: center;
     margin-left: 8px;
     margin-right: 8px;
+}
+.input-text {
+    width: 90%;
+}
+.button-text {
+    width: 10%;
 }
 .wrap-footer {
 	width: 100%;
