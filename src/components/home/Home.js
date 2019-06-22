@@ -1,5 +1,5 @@
 import React , { Component } from 'react';
-import { Route, NavLink , Switch , withRouter } from 'react-router-dom';
+import { NavLink , withRouter } from 'react-router-dom';
 import axios from 'axios';
 
 import { removeStorage, getFromStorage } from '../../utils/storage';
@@ -13,15 +13,21 @@ class Home extends Component{
 		super(props);
 		this.state = {
 			token : getFromStorage(TOKEN) || '',
+			author : getFromStorage(USER_INFO) || {},
 			conversations : [],
 			messages : [],
+			contentMessage : '',
 		}
 		this.logOut = this.logOut.bind(this);
 		this.navigateToLogin = this.navigateToLogin.bind(this);
+		this.init = this.initFetch.bind(this);
+		this.init();
+		this.onChangeText = this.onChangeText.bind(this);
+		this.replyMessage = this.replyMessage.bind(this);
 	}
 
 	render(){
-		const { conversations } = this.state;
+		const { conversations, messages, author, contentMessage } = this.state;
 		return(
 			<div className="container">
 				<div className="box">
@@ -46,24 +52,29 @@ class Home extends Component{
 						</div>
 						<div className="content">
 							<div>
-								<div className="message">
-									<div className="client">Chào anh!</div>
-								</div>
-								<div className="message">
-									<div className="server">Anh cũng chào em!</div>
-								</div>
-								<div className="message">
-									<div className="client">Anhdaskjdbsakbdksahdsahodhsadhsadhsaooddsadsadsadsasdassdasdsa anh!</div>
-								</div>
-								<div className="message">
-									<div className="server">Anhdaskjdbsakbdksahdsahodhsadhsadhsaooddsadsadsadsasdassdasdsa!</div>
-								</div>
+								{
+									messages.map(function(message){
+										if(message.author._id === author.user._id){
+											return (
+												<div className="message" key={message._id}>
+													<div className="server">{message.body}</div>
+												</div>
+											)
+										}else {
+											return (
+												<div className="message" key={message._id}>
+													<div className="client">{message.body}</div>
+												</div>
+											)
+										}
+									})
+								}
 							</div>
 						</div>
 						<div className="footer-content">
 							<div className="wrap-footer">
-								<textarea type="text" className="input-text"></textarea>
-								<button type="button" className="button-text">Send</button>
+								<textarea type="text" className="input-text" value={contentMessage} onChange={this.onChangeText}></textarea>
+								<button type="button" className="button-text" onClick={this.replyMessage}>Send</button>
 							</div>
 						</div>
 					</div>
@@ -71,8 +82,17 @@ class Home extends Component{
 			</div>
 		);
 	}
+	onChangeText(event){
+		this.setState({contentMessage : event.target.value});
+	}
+	replyMessage(){
+		
+	}
+	componentDidMount(){
+	
+	}
 
-	async componentDidMount(){
+	async initFetch(){
 		const { token } = this.state;
 
 		let conversations = await axios.get(URL + "/chat" , { headers: { "Authorization" : "Bearer " + token.token }});
@@ -80,13 +100,10 @@ class Home extends Component{
 			this.setState({conversations : conversations.data});
 		}
 
-		let a = await axios.get(URL + "/chat/" + conversations.data[0]._id , { headers: { "Authorization" : "Bearer " + token.token }});
-		console.log(a)
-	}
-
-	getConversations(){
-		
-		return 
+		let response = await axios.get(URL + "/chat/" + conversations.data[0]._id , { headers: { "Authorization" : "Bearer " + token.token }});
+		if(response.data.status === 200){
+			this.setState({messages : response.data.messages});
+		}
 	}
 
 	logOut = () => {
