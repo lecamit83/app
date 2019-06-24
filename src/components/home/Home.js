@@ -1,5 +1,5 @@
 import React , { Component } from 'react';
-import { NavLink , withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 
 import { removeStorage, getFromStorage } from '../../utils/storage';
@@ -17,13 +17,15 @@ class Home extends Component{
 			conversations : [],
 			messages : [],
 			contentMessage : '',
+			conversationId : '',
 		}
 		this.logOut = this.logOut.bind(this);
 		this.navigateToLogin = this.navigateToLogin.bind(this);
-		this.init = this.initFetch.bind(this);
-		this.init();
 		this.onChangeText = this.onChangeText.bind(this);
 		this.replyMessage = this.replyMessage.bind(this);
+		this.onChangeId = this.onChangeId.bind(this);
+		this.init = this.initFetch.bind(this);
+		this.init();
 	}
 
 	render(){
@@ -34,13 +36,11 @@ class Home extends Component{
 					<div className="side-bar-friend">
 						<div className="header-content">
 							<div>List Friends</div>
-						</div>
-						<div>
-						<ul>
+						</div>	
+						<div style={{display: "flex", flexDirection : 'column' }}>
 						{
-							conversations.map(conversation => <li key={`/chat/${conversation._id}`}><NavLink to={`${conversation._id}`}>{conversation.participants[0].name}</NavLink></li>)
+							conversations.map(conversation => <button style={{margin : 8}} key={conversation._id} onClick={this.onChangeId(conversation._id)}>{conversation.participants[0].name}</button>)
 						}
-						</ul>
 						</div>
 					</div>
 					<div className="box-chat">
@@ -82,11 +82,35 @@ class Home extends Component{
 			</div>
 		);
 	}
+	onChangeId(value){
+		const { conversationId, token } = this.state;
+		if(value !== conversationId){
+			return async ()=>{
+				let response = await axios.get(URL + "/chat/" + value , { headers: { "Authorization" : "Bearer " + token.token }});
+				if(response.data.status === 200){
+					this.setState({messages : response.data.messages});
+				}
+				this.setState({conversationId : value});
+			};
+		}
+		
+	}
 	onChangeText(event){
 		this.setState({contentMessage : event.target.value});
 	}
 	replyMessage(){
-		
+		const { token, contentMessage, conversationId } = this.state;
+		axios.post(URL + '/chat/' + conversationId ,{
+			contentMessage
+		},{
+			headers : {
+				"Authorization" : "Bearer " + token.token,
+				"Content-Type" : "application/json"
+			}
+		}).then(res=>{
+			console.log(res);
+			this.setState({contentMessage : ''});
+		});
 	}
 	componentDidMount(){
 	
@@ -94,13 +118,16 @@ class Home extends Component{
 
 	async initFetch(){
 		const { token } = this.state;
-
 		let conversations = await axios.get(URL + "/chat" , { headers: { "Authorization" : "Bearer " + token.token }});
 		if(conversations.status === 200) {
-			this.setState({conversations : conversations.data});
+			this.setState({
+				conversations : conversations.data,
+				conversationId : conversations.data[0]._id
+			});
 		}
+		const { conversationId } = this.state;
 
-		let response = await axios.get(URL + "/chat/" + conversations.data[0]._id , { headers: { "Authorization" : "Bearer " + token.token }});
+		let response = await axios.get(URL + "/chat/" + conversationId , { headers: { "Authorization" : "Bearer " + token.token }});
 		if(response.data.status === 200){
 			this.setState({messages : response.data.messages});
 		}
